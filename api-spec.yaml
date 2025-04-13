@@ -1,0 +1,958 @@
+openapi: 3.1.0
+info:
+  title: New Webinar App
+  # PLEASE CREATE DESCRIPTION
+  description: New Webinar App
+  version: 1.0.0
+servers:
+  - url: 'localhost:3000/api'
+paths:
+  /users/signup:
+    post:
+      tags:
+        - users
+      description: create new user
+      summary: create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        200:
+          description: success create a new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+  /users/signin:
+    post:
+      tags:
+        - users
+      description: sign in user
+      summary: sign in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        200:
+          description: user success sign in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+  /users/logout:
+    delete:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      description: sign out user
+      summary: sign out user
+      responses:
+        200:
+          description: success logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+  /users/refresh:
+    get:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      description: get new token, access token and refresh token
+      summary: get new token, access token and refresh token
+      responses:
+        200:
+          description: success get new token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+  /users/current:
+    get:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      description: get current user
+      summary: get current user
+      responses:
+        200:
+          description: success get current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    patch:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      description: update user
+      summary: update user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        200:
+          description: success update user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /events:
+    get:
+      tags:
+        - events
+      security:
+        - bearerAuth: [ ]
+      description: get all events
+      summary: get all events
+      responses:
+        200:
+          description: success get all events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataEventResponse'
+    post:
+      tags:
+        - events
+      security:
+        - bearerAuth: [ ]
+      description: create new event
+      summary: create new event
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateRequest'
+      responses:
+        200:
+          description: success create event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/DataEventResponse"
+  /events/{eventId}:
+    patch:
+      tags:
+        - events
+      security:
+        - bearerAuth: [ ]
+      description: update event by id
+      summary: update event by id
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdateRequest'
+      responses:
+        200:
+          description: success update event by id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/DataEventResponse"
+    get:
+      tags:
+        - events
+      security:
+        - bearerAuth: [ ]
+      description: get event by id
+      summary: get event by id
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success update event by id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/DataEventResponse"
+    delete:
+      tags:
+        - events
+      security:
+        - bearerAuth: [ ]
+      description: delete event by id
+      summary: delete event by id
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success update event by id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+  /events/{eventId}/poster:
+    post:
+      tags:
+        - poster
+      security:
+        - bearerAuth: [ ]
+      description: add poster in event
+      summary: add poster in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventPosterOrCertificateRequest'
+      responses:
+        200:
+          description: success add poster in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+  /events/{eventId}/poster/{posterId}:
+    get:
+      tags:
+        - poster
+      security:
+        - bearerAuth: [ ]
+      description: get poster in event
+      summary: get poster in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: posterId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success get poster in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+    patch:
+      tags:
+        - poster
+      security:
+        - bearerAuth: [ ]
+      description: update poster in event
+      summary: update poster in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: posterId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventPosterOrCertificateRequest'
+      responses:
+        200:
+          description: success update poster in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+    delete:
+      tags:
+        - poster
+      security:
+        - bearerAuth: [ ]
+      description: update poster in event
+      summary: update poster in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: posterId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success update poster in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+  /events/{eventId}/certificate_template:
+    post:
+      tags:
+        - certificate template
+      security:
+        - bearerAuth: [ ]
+      description: add certificate template in event
+      summary: add certificate template in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventPosterOrCertificateRequest'
+      responses:
+        200:
+          description: success add certificate template in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+  /events/{eventId}/certificate_template/{certificate_templateId}:
+    get:
+      tags:
+        - certificate template
+      security:
+        - bearerAuth: [ ]
+      description: get certificate template in event
+      summary: get certificate template in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: certificate_templateId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success get certificate template in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+    patch:
+      tags:
+        - certificate template
+      security:
+        - bearerAuth: [ ]
+      description: update certificate template in event
+      summary: update certificate template in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: certificate_templateId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventPosterOrCertificateRequest'
+      responses:
+        200:
+          description: success update certificate template in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/DataEventPosterOrCertificateResponse'
+    delete:
+      tags:
+        - certificate template
+      security:
+        - bearerAuth: [ ]
+      description: update certificate template in event
+      summary: update certificate template in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: certificate_templateId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success update certificate template in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+  /events/{eventId}/feedbacks:
+    post:
+      tags:
+        - feedbacks
+      security:
+        - bearerAuth: [ ]
+      description: create new feedback in event
+      summary: create new feedback in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+      responses:
+        200:
+          description: success create new feedback
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/FeedbackResponse'
+    get:
+      tags:
+        - feedbacks
+      security:
+        - bearerAuth: [ ]
+      description: get all feedback in event
+      summary: get all feedback in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success get all feedback in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeedbackResponse'
+  /events/{eventId}/feedbacks/{feedbackId}:
+    patch:
+      tags:
+        - feedbacks
+      security:
+        - bearerAuth: [ ]
+      description: update feedback in event
+      summary: update feedback in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: feedbackId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+      responses:
+        200:
+          description: success update feedback in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/FeedbackResponse'
+    delete:
+      tags:
+        - feedbacks
+      security:
+        - bearerAuth: [ ]
+      description: delete feedback in event
+      summary: delete feedback in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: feedbackId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success delete feedback in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+  /events/{eventId}/registrations:
+    post:
+      tags:
+        - registrations
+      security:
+        - bearerAuth: [ ]
+      description: join in event
+      summary: join in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        200:
+          description: success join event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/RegistrationResponse'
+    get:
+      tags:
+        - registrations
+      security:
+        - bearerAuth: [ ]
+      description: get all registration in event
+      summary: get all registration event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success get all registration in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RegistrationResponse'
+  /events/{eventId}/registrations/{registrationId}:
+    patch:
+      tags:
+        - registrations
+      security:
+        - bearerAuth: [ ]
+      description: update registration in event
+      summary: update registration in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: registrationId
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        200:
+          description: success update feedback in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/RegistrationResponse'
+    delete:
+      tags:
+        - registrations
+      security:
+        - bearerAuth: [ ]
+      description: delete registration in event
+      summary: delete registration in event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: registrationId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: success delete registration in event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  status:
+                    type: string
+                  data:
+                    type: object
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+            role:
+              type: string
+    TokenResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+    EventCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        date:
+          type: string
+        speaker:
+          type: string
+        material_link:
+          type: string
+        meeting_link:
+          type: string
+        type:
+          type: string
+        category_id:
+          type: integer
+    EventUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        date:
+          type: string
+        speaker:
+          type: string
+        material_link:
+          type: string
+        meeting_link:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        category_id:
+          type: integer
+    DataEventResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        date:
+          type: string
+        speaker:
+          type: string
+        material_link:
+          type: string
+        meeting_link:
+          type: string
+        status:
+          type: string
+        type:
+          type: string
+        category_id:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    EventPosterOrCertificateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+    DataEventPosterOrCertificateResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        created_at:
+          type: string
+    FeedbackRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+    FeedbackResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        comment:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    RegistrationRequest:
+      type: object
+      properties:
+        role_in_event:
+          type: string
+    RegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        role_in_event:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
