@@ -1,7 +1,6 @@
 openapi: 3.1.0
 info:
   title: New Webinar App
-  # PLEASE CREATE DESCRIPTION
   description: New Webinar App
   version: 1.0.0
 servers:
