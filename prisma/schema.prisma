@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(200)
+  email        String         @db.VarChar(200)
+  password     String         @db.VarChar(100)
+  role         Role           @default(USER)
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  Event        Event[]
+  Registration Registration[]
+  Feedback     Feedback[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Event {
+  id                   Int                  @id @default(autoincrement())
+  title                String               @db.VarChar(200)
+  description          String               @db.Text
+  date                 DateTime             @db.Timestamp(0)
+  location             String               @db.VarChar(200)
+  speaker              String               @db.Text
+  material_link        String               @db.Text
+  meeting_link         String               @db.Text
+  status               Status               @default(PENDING)
+  type                 Type                 @default(ONLINE)
+  created_at           DateTime             @default(now())
+  updated_at           DateTime             @updatedAt
+  category_id          Int
+  user_id              Int
+  category             Category             @relation(fields: [category_id], references: [id])
+  user                 User                 @relation(fields: [user_id], references: [id])
+  registrations        Registration[]
+  feedbacks            Feedback[]
+  poster               Poster?
+  certificate_template CertificateTemplate?
+
+  @@map("events")
+}
+
+model Poster {
+  id       Int    @id @default(autoincrement())
+  url      String @db.Text
+  name     String @db.VarChar(200)
+  event_id Int    @unique
+  event    Event  @relation(fields: [event_id], references: [id])
+
+  @@map("posters")
+}
+
+model CertificateTemplate {
+  id       Int    @id @default(autoincrement())
+  url      String @db.Text
+  name     String @db.VarChar(200)
+  event_id Int    @unique
+  event    Event  @relation(fields: [event_id], references: [id])
+
+  @@map("certificate_templates")
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Type {
+  OFFLINE
+  ONLINE
+  HYBRID
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @db.VarChar(200)
+  events Event[]
+
+  @@map("categories")
+}
+
+model Registration {
+  id            Int         @id @default(autoincrement())
+  user_id       Int
+  event_id      Int
+  user          User        @relation(fields: [user_id], references: [id])
+  event         Event       @relation(fields: [event_id], references: [id])
+  role_in_event RoleInEvent @default(PARTICIPANT)
+  created_at    DateTime    @default(now())
+}
+
+enum RoleInEvent {
+  PARTICIPANT
+  ORGANIZER
+}
+
+model Feedback {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  event_id   Int
+  user       User     @relation(fields: [user_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id])
+  comment    String   @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("feedbacks")
+}
