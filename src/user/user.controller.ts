@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -74,6 +75,18 @@ export class UserController {
   ): Promise<WebResponse<UserResponse>> {
     request.id = user.id;
     const result = await this.userService.update(request);
+
+    return {
+      code: HttpStatus.OK,
+      status: 'OK',
+      data: result,
+    };
+  }
+
+  @Delete('/logout')
+  @HttpCode(HttpStatus.OK)
+  logout(@Auth() user: JwtPayload): WebResponse<boolean> {
+    const result = this.userService.logout(user);
 
     return {
       code: HttpStatus.OK,

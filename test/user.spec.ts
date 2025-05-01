@@ -335,4 +335,67 @@ describe('User Controller', () => {
       expect(response2.body.errors).toBeDefined();
     });
   });
+
+  describe('DELETE /api/v1/users/logout ', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+
+      await testService.createUser();
+    });
+
+    it('should can be success login and success logout user', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .delete('/api/v1/users/logout')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}`);
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data).toBeTruthy();
+    });
+
+    it('should can be success login but invalid logout because no bearer', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .delete('/api/v1/users/logout')
+        .set(
+          'Authorization',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          `Bearer ${response1.body.data.access_token}salah`,
+        );
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.errors).toBeDefined();
+    });
+  });
 });

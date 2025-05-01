@@ -173,4 +173,10 @@ export class UserService {
       name: updateUser.name,
     };
   }
+
+  logout(user: any): boolean {
+    this.logger.debug(`Logout user ${JSON.stringify(user)}`);
+
+    return true;
+  }
 }
