@@ -5,9 +5,11 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { AuthService } from '../auth/auth.service';
 import {
+  JwtPayload,
   TokenResponse,
   UserLoginRequest,
   UserRegisterRequest,
+  UserResponse,
 } from '../model/user.model';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
@@ -104,6 +106,26 @@ export class UserService {
 
     return {
       access_token: token.access_token,
+    };
+  }
+
+  async get(request: JwtPayload): Promise<UserResponse> {
+    this.logger.debug(`Getting user ${JSON.stringify(request)}`);
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: request.id,
+      },
+    });
+
+    if (!user) {
+      this.logger.error(`Unauthorized ${JSON.stringify(request)}`);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return {
+      email: user.email,
+      name: user.name,
     };
   }
 }

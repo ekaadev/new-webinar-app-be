@@ -132,4 +132,70 @@ describe('User Controller', () => {
       expect(response.body.errors).toBeDefined();
     });
   });
+
+  describe('GET /api/v1/users/current ', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+
+      await testService.createUser();
+    });
+
+    it('should can be success login and get current user', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .get('/api/v1/users/current')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}`);
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data.email).toBe('test@mail.com');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data.name).toBe('test');
+    });
+
+    it('should can be success login but invalid get current user', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .get('/api/v1/users/current')
+
+        .set(
+          'Authorization',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          `Bearer ${response1.body.data.access_token}salah`,
+        );
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.errors).toBeDefined();
+    });
+  });
 });
