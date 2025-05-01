@@ -79,4 +79,57 @@ describe('User Controller', () => {
       expect(response.body.errors).toBeDefined();
     });
   });
+
+  describe('POST /api/v1/users/login ', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+
+      await testService.createUser();
+    });
+
+    it('should can be success login', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response.body);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.data.access_token).toBeDefined();
+    });
+
+    it('should can be rejected login if the request is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: '',
+          password: '',
+        });
+
+      logger.debug(response.body);
+
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should can be rejected login if user is wrong email or password', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'salah',
+        });
+
+      logger.debug(response.body);
+
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.errors).toBeDefined();
+    });
+  });
 });

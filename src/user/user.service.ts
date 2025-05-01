@@ -4,7 +4,11 @@ import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { AuthService } from '../auth/auth.service';
-import { TokenResponse, UserRegisterRequest } from '../model/user.model';
+import {
+  TokenResponse,
+  UserLoginRequest,
+  UserRegisterRequest,
+} from '../model/user.model';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 
@@ -50,6 +54,53 @@ export class UserService {
     });
 
     const token: TokenResponse = await this.authService.register(user);
+
+    return {
+      access_token: token.access_token,
+    };
+  }
+
+  async login(request: UserLoginRequest): Promise<TokenResponse> {
+    this.logger.debug(`Login user ${JSON.stringify(request)}`);
+
+    const userLoginRequest: UserLoginRequest =
+      this.validationService.validate<UserLoginRequest>(
+        UserValidation.LOGIN,
+        request,
+      );
+
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email: userLoginRequest.email,
+      },
+    });
+
+    if (!user) {
+      this.logger.error(
+        `email or password is wrong ${JSON.stringify(userLoginRequest)}`,
+      );
+      throw new HttpException(
+        'email or password is wrong',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const passwordValid = await bcrypt.compare(
+      userLoginRequest.password,
+      user.password,
+    );
+
+    if (!passwordValid) {
+      this.logger.error(
+        `email or password is wrong ${JSON.stringify(userLoginRequest)}`,
+      );
+      throw new HttpException(
+        'email or password is wrong',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const token: TokenResponse = await this.authService.login(user);
 
     return {
       access_token: token.access_token,

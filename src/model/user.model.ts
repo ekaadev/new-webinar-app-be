@@ -15,3 +15,8 @@ export class UserRegisterRequest {
   password: string;
   role?: string;
 }
+
+export class UserLoginRequest {
+  email: string;
+  password: string;
+}
