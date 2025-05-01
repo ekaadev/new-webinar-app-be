@@ -198,4 +198,141 @@ describe('User Controller', () => {
       expect(response2.body.errors).toBeDefined();
     });
   });
+
+  describe('PATCH /api/v1/users/current ', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+
+      await testService.createUser();
+    });
+
+    it('should can be success login and update current user(name)', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .patch('/api/v1/users/current')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}`)
+        .send({
+          name: 'test update',
+        });
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data.email).toBe('test@mail.com');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data.name).toBe('test update');
+    });
+
+    it('should can be success login and update current user(password)', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .patch('/api/v1/users/current')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}`)
+        .send({
+          password: 'password update',
+        });
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.data.email).toBe('test@mail.com');
+
+      const response3 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response3.body);
+
+      expect(response2.status).toBe(HttpStatus.OK);
+    });
+
+    it('should can be success login but invalid request', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .patch('/api/v1/users/current')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}`)
+        .send({
+          name: '',
+        });
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.BAD_REQUEST);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.errors).toBeDefined();
+    });
+
+    it('should can be success login but no auth', async () => {
+      const response1 = await request(app.getHttpServer())
+        .post('/api/v1/users/login')
+        .send({
+          email: 'test@mail.com',
+          password: 'password',
+        });
+
+      logger.debug(response1.body);
+
+      expect(response1.status).toBe(HttpStatus.OK);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response1.body.data.access_token).toBeDefined();
+
+      const response2 = await request(app.getHttpServer())
+        .patch('/api/v1/users/current')
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        .set('Authorization', `Bearer ${response1.body.data.access_token}salah`)
+        .send({
+          name: 'benar',
+        });
+
+      logger.debug(response2.body);
+
+      expect(response2.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response2.body.errors).toBeDefined();
+    });
+  });
 });

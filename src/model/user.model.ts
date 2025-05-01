@@ -25,3 +25,9 @@ export class UserResponse {
   name: string;
   email: string;
 }
+
+export class UserUpdateRequest {
+  id: number;
+  name?: string;
+  password?: string;
+}

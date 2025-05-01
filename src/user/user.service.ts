@@ -10,6 +10,7 @@ import {
   UserLoginRequest,
   UserRegisterRequest,
   UserResponse,
+  UserUpdateRequest,
 } from '../model/user.model';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
@@ -119,13 +120,57 @@ export class UserService {
     });
 
     if (!user) {
-      this.logger.error(`Unauthorized ${JSON.stringify(request)}`);
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      this.logger.error(`User not found ${JSON.stringify(request)}`);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     return {
       email: user.email,
       name: user.name,
+    };
+  }
+
+  async update(request: UserUpdateRequest): Promise<UserResponse> {
+    this.logger.debug(`Update user ${JSON.stringify(request)}`);
+
+    const userUpdateRequest: UserUpdateRequest =
+      this.validationService.validate<UserUpdateRequest>(
+        UserValidation.UPDATE,
+        request,
+      );
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userUpdateRequest.id,
+      },
+    });
+
+    if (!user) {
+      this.logger.error(`User with id ${userUpdateRequest.id} not found`);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (userUpdateRequest.name) {
+      user.name = userUpdateRequest.name;
+    }
+
+    if (userUpdateRequest.password) {
+      user.password = await bcrypt.hash(userUpdateRequest.password, 10);
+    }
+
+    const updateUser = await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        name: user.name,
+        password: user.password,
+      },
+    });
+
+    return {
+      email: updateUser.email,
+      name: updateUser.name,
     };
   }
 }
