@@ -8,3 +8,10 @@ export class JwtPayload {
 export class TokenResponse {
   access_token: string;
 }
+
+export class UserRegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+}
